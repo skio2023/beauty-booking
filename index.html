@@ -278,7 +278,7 @@
     const type=item.multiSlot?'checkbox':'radio';
     $('slotLabel').innerHTML='預約時段<span class="req">*</span><span class="hint">'
       +(item.multiSlot?'每場 1 人，要約 2 人請選 2 個時段；':'')
-      +'時段額滿可候補（候補上限 2 人）</span>';
+      +'時段額滿可候補</span>';
     $('slots').innerHTML=genSlots(item).map(t=>
       `<label class="slot"><input type="${type}" name="slot" value="${t}">${t}</label>`).join('');
     bindSlots();
