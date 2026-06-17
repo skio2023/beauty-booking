@@ -230,7 +230,7 @@
     onda:{ title:'Onda', key:'Onda', mains:[], mainRequired:false,
       addons:[], ranges:[['13:00','18:00']], step:20 },
     botox:{ title:'純肉毒療程', key:'純肉毒', mains:[], mainRequired:false,
-      botoxSites:true, addons:['敷麻','冰敷'], ranges:[['13:00','20:00']], step:60, rest:['16:00'] }
+      botoxSites:true, addons:['敷麻','冰敷'], addonExclusive:true, ranges:[['13:00','20:00']], step:60, rest:['16:00'] }
   };
 
   let CONFIG={}, COUNTS={}, currentItem=null;
@@ -268,6 +268,7 @@
 
     if(item.addons.length){
       $('addonField').style.display='';
+      document.querySelector('#addonField .hint').textContent=item.addonExclusive?'（選填・擇一）':'（選填）';
       $('addonOpts').innerHTML=item.addons.map(a=>{const note=a==='冰敷'?'<span class="opt-note">更有效喔！</span>':'';return `<label class="opt"><input type="checkbox" class="addon" value="${a}">${a}${note}</label>`;}).join('');
     }else{$('addonField').style.display='none';$('addonOpts').innerHTML='';}
 
@@ -293,6 +294,9 @@
     document.querySelectorAll('.opt').forEach(el=>{
       const inp=el.querySelector('input');
       inp.addEventListener('change',()=>{
+        if(inp.classList.contains('addon') && inp.checked && ITEMS[currentItem].addonExclusive){
+          document.querySelectorAll('.addon').forEach(o=>{if(o!==inp){o.checked=false;o.closest('.opt').classList.remove('on');}});
+        }
         el.classList.toggle('on',inp.checked);
         if(inp.classList.contains('addon')) updateSites();
       });
