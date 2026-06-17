@@ -86,16 +86,13 @@
   @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
   .pickfirst{text-align:center;color:var(--muted);font-size:13px;padding:6px 0 2px;}
 
-  /* 諮詢按鈕 */
-  .consult{display:flex;align-items:center;gap:14px;margin-top:16px;padding:16px 18px;border-radius:18px;
-    background:linear-gradient(135deg,#fff,#f3f9f1);border:1.5px solid #cdeed8;text-decoration:none;color:var(--ink);
-    box-shadow:0 8px 24px rgba(6,199,85,.10);transition:.2s;}
-  .consult:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(6,199,85,.18);}
-  .consult .ci{width:44px;height:44px;border-radius:50%;background:var(--line-green);color:#fff;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;font-size:22px;}
-  .consult .ctitle{font-size:16px;font-weight:700;}
-  .consult .cdesc{font-size:12.5px;color:var(--muted);margin-top:2px;}
-  .consult .cgo{margin-left:auto;color:var(--line-green);font-weight:700;font-size:14px;white-space:nowrap;}
+  /* 諮詢 */
+  .consult-box{text-align:center;margin-top:18px;}
+  .consult-desc{font-size:13px;color:var(--muted);margin-bottom:9px;}
+  .consult-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:999px;
+    background:var(--line-green);color:#fff;text-decoration:none;font-size:14px;font-weight:600;
+    box-shadow:0 4px 12px rgba(6,199,85,.22);transition:.2s;}
+  .consult-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(6,199,85,.3);}
 
   .footnote{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;letter-spacing:.5px;}
 
@@ -174,7 +171,7 @@
           <div class="opts" id="siteOpts"></div>
         </div>
         <div class="field">
-          <label class="label">預約日期<span class="req">*</span></label>
+          <label class="label">預約日期<span class="req">*</span><span class="hint" id="dateHint"></span></label>
           <input type="date" id="date">
         </div>
         <div class="field">
@@ -191,15 +188,11 @@
       <button type="submit" class="submit" id="submitBtn" style="display:none;">送 出 預 約</button>
     </form>
 
-    <!-- 諮詢按鈕 -->
-    <a class="consult" href="https://line.me/ti/p/9fy2qZ-qg9" target="_blank" rel="noopener">
-      <span class="ci">🥨</span>
-      <span>
-        <span class="ctitle">諮詢語彤🥨</span>
-        <span class="cdesc">還不知道哪裡可以更美？歡迎諮詢！</span>
-      </span>
-      <span class="cgo">前往 ›</span>
-    </a>
+    <!-- 諮詢 -->
+    <div class="consult-box">
+      <p class="consult-desc">還不確定適合什麼療程？先來跟語彤諮詢。</p>
+      <a class="consult-btn" href="https://line.me/ti/p/9fy2qZ-qg9" target="_blank" rel="noopener">諮詢語彤🥨</a>
+    </div>
 
     <p class="footnote">送出後僅為預約申請，正式時段以專人聯繫確認為準</p>
   </div>
@@ -221,6 +214,7 @@
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbySt3iWpoZHpE9KmuCTybgZxNsTVD4pU6gUdoThHkF684g0MXoVV7x2Rak_yESv3Qzamg/exec";
 
   const WAITLIST_CAP = 2; // 每個時段額滿後可候補人數（全項目通用）
+  const FIXED_DATE = "2026-07-26"; // 設定後預約日期固定此日；要恢復自由選擇就改成 ""
   const BOTOX_SITES = ['額頭（抬頭紋）','眉間（皺眉紋）','眼周（魚尾紋）','國字臉（咀嚼肌）','肩頸（斜方肌）','下巴'];
 
   /* 三個預約項目定義（multiSlot：時段可複選，每格一人）
@@ -323,7 +317,13 @@
   /* 日期 */
   const dateInput=$('date');
   const today=new Date();
-  dateInput.min=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().split('T')[0];
+  const todayStr=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().split('T')[0];
+  if(FIXED_DATE){
+    dateInput.value=FIXED_DATE; dateInput.min=FIXED_DATE; dateInput.max=FIXED_DATE; dateInput.readOnly=true;
+    $('dateHint').textContent='（目前僅開放此日）';
+  }else{
+    dateInput.min=todayStr;
+  }
   dateInput.addEventListener('change',()=>{if(dateInput.value)loadCounts(dateInput.value);});
 
   /* JSONP */
