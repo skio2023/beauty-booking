@@ -223,14 +223,15 @@
   const WAITLIST_CAP = 2; // 每個時段額滿後可候補人數（全項目通用）
   const BOTOX_SITES = ['額頭（抬頭紋）','眉間（皺眉紋）','眼周（魚尾紋）','國字臉（咀嚼肌）','肩頸（斜方肌）','下巴'];
 
-  /* 三個預約項目定義（multiSlot：時段可複選，每格一人） */
+  /* 三個預約項目定義（multiSlot：時段可複選，每格一人）
+     rest：休息時段，正常名額視為 0、只開放候補（Onda 不受影響） */
   const ITEMS = {
     rf_us:{ title:'電波・音波', key:'電波・音波', mains:['電波','音波'], mainRequired:true,
-      multiSlot:true, addons:['敷麻','肉毒'], ranges:[['13:00','20:00']], step:60 },
+      multiSlot:true, addons:['敷麻','肉毒'], ranges:[['13:00','20:00']], step:60, rest:['16:00'] },
     onda:{ title:'Onda', key:'Onda', mains:[], mainRequired:false,
       addons:[], ranges:[['13:00','18:00']], step:20 },
     botox:{ title:'純肉毒療程', key:'純肉毒', mains:[], mainRequired:false,
-      botoxSites:true, addons:['敷麻'], ranges:[['13:00','20:00']], step:60 }
+      botoxSites:true, addons:['敷麻'], ranges:[['13:00','20:00']], step:60, rest:['16:00'] }
   };
 
   let CONFIG={}, COUNTS={}, currentItem=null;
@@ -245,6 +246,8 @@
     return out;
   }
   function normalCapOf(item){return (CONFIG[item.key]&&CONFIG[item.key].limit)||0;}
+  // 休息時段正常名額視為 0（只開候補）
+  function normalCapForSlot(item,slot){return (item.rest&&item.rest.indexOf(slot)>=0)?0:normalCapOf(item);}
 
   /* 項目選擇 */
   document.querySelectorAll('.item').forEach(el=>{
@@ -356,9 +359,9 @@
   function refreshSlots(){
     if(!currentItem)return;
     const item=ITEMS[currentItem];
-    const nCap=normalCapOf(item), tCap=nCap+WAITLIST_CAP;
     document.querySelectorAll('.slot').forEach(el=>{
       const inp=el.querySelector('input'), slot=inp.value;
+      const nCap=normalCapForSlot(item,slot), tCap=nCap+WAITLIST_CAP;
       el.querySelectorAll('.left').forEach(x=>x.remove());
       el.classList.remove('wait','full');
       if(!connected())return;
@@ -399,8 +402,7 @@
     if(slots.length===0){alert('請選擇預約時段');ok=false;}
     if(!ok)return;
 
-    const nCap=normalCapOf(item);
-    const guessWait=slots.some(s=>((COUNTS[item.key]&&COUNTS[item.key][s])||0)>=nCap);
+    const guessWait=slots.some(s=>((COUNTS[item.key]&&COUNTS[item.key][s])||0)>=normalCapForSlot(item,s));
     const people=item.multiSlot?slots.length:1;
     const payload={item:item.key,name:name.value.trim(),phone:phone.value.trim(),
       mains,addons,sites,people,slots,date:date.value,note:$('note').value.trim()};
