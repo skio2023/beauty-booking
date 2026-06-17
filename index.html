@@ -40,13 +40,10 @@
 
   /* 項目卡片 */
   .items{display:grid;gap:12px;}
-  .item{
-    position:relative;border:1.5px solid var(--line);border-radius:16px;padding:16px 16px;
-    cursor:pointer;background:#fdfaf7;transition:.18s;
-  }
+  .item{position:relative;border:1.5px solid var(--line);border-radius:16px;padding:16px 16px;cursor:pointer;background:#fdfaf7;transition:.18s;}
   .item:hover{border-color:var(--rose);}
   .item input{position:absolute;opacity:0;pointer-events:none;}
-  .item .it-top{display:flex;align-items:baseline;gap:8px;}
+  .item .it-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
   .item .it-name{font-size:18px;font-weight:700;}
   .item .it-unit{font-size:12px;color:var(--gold-deep);font-weight:600;background:#f6eede;padding:2px 8px;border-radius:8px;}
   .item .it-meta{font-size:12.5px;color:var(--muted);margin-top:6px;}
@@ -57,37 +54,28 @@
   .item.full{opacity:.5;cursor:not-allowed;filter:grayscale(.4);}
   .item.full:hover{border-color:var(--line);}
 
-  /* 選項 pill（主療程 / 加購） */
+  /* 選項 pill（主療程 / 加購 / 部位） */
   .opts{display:flex;flex-wrap:wrap;gap:10px;}
-  .opt{
-    position:relative;border:1.5px solid var(--line);border-radius:12px;padding:10px 16px;
-    cursor:pointer;background:#fdfaf7;font-size:15px;font-weight:600;transition:.18s;
-  }
+  .opt{position:relative;border:1.5px solid var(--line);border-radius:12px;padding:10px 16px;cursor:pointer;background:#fdfaf7;font-size:15px;font-weight:600;transition:.18s;}
   .opt:hover{border-color:var(--rose);}
   .opt input{position:absolute;opacity:0;pointer-events:none;}
   .opt.on{border-color:var(--gold);background:var(--gold);color:#fff;box-shadow:0 5px 14px rgba(192,160,106,.22);}
 
   /* 時段 */
-  .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:9px;}
-  .slot{
-    position:relative;border:1.5px solid var(--line);border-radius:12px;padding:9px 4px;
-    text-align:center;font-size:14px;cursor:pointer;background:#fdfaf7;transition:.18s;
-  }
+  .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:9px;}
+  .slot{position:relative;border:1.5px solid var(--line);border-radius:12px;padding:9px 4px;text-align:center;font-size:14px;cursor:pointer;background:#fdfaf7;transition:.18s;}
   .slot:hover{border-color:var(--rose);}
   .slot input{position:absolute;opacity:0;pointer-events:none;}
   .slot.on{border-color:var(--gold);background:var(--gold);color:#fff;font-weight:600;box-shadow:0 5px 14px rgba(192,160,106,.25);}
+  .slot.wait{border-style:dashed;}
   .slot.full{opacity:.45;cursor:not-allowed;filter:grayscale(.4);}
   .slot.full:hover{border-color:var(--line);}
   .slot .left{display:block;font-size:10px;color:var(--gold-deep);margin-top:1px;font-weight:600;}
   .slot.on .left{color:#fff;}
   .slot.full .left{color:var(--rose);}
+  .slot.wait .left{color:var(--rose);}
 
-  .submit{
-    width:100%;padding:16px;border:none;border-radius:15px;
-    background:linear-gradient(135deg,var(--gold),var(--gold-deep));
-    color:#fff;font-size:17px;font-weight:700;letter-spacing:3px;cursor:pointer;
-    margin-top:6px;font-family:inherit;transition:.2s;box-shadow:0 8px 22px rgba(168,133,79,.30);
-  }
+  .submit{width:100%;padding:16px;border:none;border-radius:15px;background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#fff;font-size:17px;font-weight:700;letter-spacing:3px;cursor:pointer;margin-top:6px;font-family:inherit;transition:.2s;box-shadow:0 8px 22px rgba(168,133,79,.30);}
   .submit:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(168,133,79,.38);}
   .submit:active{transform:translateY(0);}
   .submit:disabled{opacity:.6;cursor:wait;}
@@ -128,8 +116,8 @@
         <div class="items" id="items">
           <label class="item">
             <input type="radio" name="item" value="rf_us">
-            <div class="it-top"><span class="it-name">電波・音波</span><span class="it-unit">1 小時／場</span></div>
-            <div class="it-meta">服務時間 12:00–20:00</div>
+            <div class="it-top"><span class="it-name">電波・音波</span><span class="it-unit">1 小時／場・每場 1 人</span></div>
+            <div class="it-meta">服務時間 13:00–20:00（12:00–13:00 為準備時間）</div>
             <div class="it-add">可加購：敷麻、肉毒（不額外佔用時間）</div>
             <span class="tick">✓</span>
           </label>
@@ -141,7 +129,7 @@
           </label>
           <label class="item">
             <input type="radio" name="item" value="botox">
-            <div class="it-top"><span class="it-name">純肉毒療程</span><span class="it-unit">10 分鐘／場</span></div>
+            <div class="it-top"><span class="it-name">純肉毒療程</span><span class="it-unit">1 小時／場・每場 2 人</span></div>
             <div class="it-meta">服務時間 14:00–15:00、17:00–18:00</div>
             <div class="it-add">可加購：敷麻</div>
             <span class="tick">✓</span>
@@ -161,37 +149,26 @@
 
       <!-- 步驟 2：依項目動態顯示 -->
       <div id="subform">
-        <!-- 主療程（電波音波才有） -->
         <div class="field" id="mainField">
           <label class="label">療程項目<span class="req">*</span><span class="hint">可複選</span></label>
           <div class="opts" id="mainOpts"></div>
         </div>
-        <!-- 人數（電波音波才有） -->
-        <div class="field" id="peopleField">
-          <label class="label">預約人數<span class="req">*</span><span class="hint">同一時段最多 2 人</span></label>
-          <div class="opts" id="peopleOpts"></div>
-        </div>
-        <!-- 加購 -->
         <div class="field" id="addonField">
           <label class="label">加購 <span class="hint">（選填）</span></label>
           <div class="opts" id="addonOpts"></div>
         </div>
-        <!-- 肉毒施打部位（有肉毒時才出現） -->
         <div class="field" id="sitesField">
           <label class="label">肉毒施打部位<span class="req">*</span><span class="hint">可複選</span></label>
           <div class="opts" id="siteOpts"></div>
         </div>
-        <!-- 日期 -->
         <div class="field">
           <label class="label">預約日期<span class="req">*</span></label>
           <input type="date" id="date">
         </div>
-        <!-- 時段 -->
         <div class="field">
           <label class="label" id="slotLabel">預約時段<span class="req">*</span></label>
           <div class="slots" id="slots"></div>
         </div>
-        <!-- 備註 -->
         <div class="field">
           <label class="label">備註 <span class="hint">（選填）</span></label>
           <textarea id="note" placeholder="有任何需求或想諮詢的問題，可在此說明"></textarea>
@@ -205,12 +182,11 @@
     <p class="footnote">送出後僅為預約申請，正式時段以專人聯繫確認為準</p>
   </div>
 
-  <!-- 成功視窗 -->
   <div class="overlay" id="overlay">
     <div class="done">
       <div class="ic">✓</div>
-      <h2>預約已送出</h2>
-      <p style="color:var(--muted);font-size:14px;">我們已收到您的預約申請</p>
+      <h2 id="doneTitle">預約已送出</h2>
+      <p style="color:var(--muted);font-size:14px;" id="doneSub">我們已收到您的預約申請</p>
       <div class="summary" id="summary"></div>
       <button id="closeBtn">完成</button>
     </div>
@@ -218,22 +194,24 @@
 
 <script>
   /* ===================================================================
-     部署 Google Apps Script 後，把 /exec 網址貼到這裡
-     留空 = 本機示範模式（不連試算表、不檢查額滿，僅供畫面測試）
+     Google Apps Script 網頁應用程式網址（/exec）。留空＝本機示範模式
   =================================================================== */
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbySt3iWpoZHpE9KmuCTybgZxNsTVD4pU6gUdoThHkF684g0MXoVV7x2Rak_yESv3Qzamg/exec";
 
-  /* 肉毒可選施打部位 */
   const BOTOX_SITES = ['額頭（抬頭紋）','眉間（皺眉紋）','眼周（魚尾紋）','國字臉（咀嚼肌）','肩頸（斜方肌）','下巴'];
 
-  /* 三個預約項目定義 */
+  /* 三個預約項目定義
+     - multiSlot：時段可複選（每格一人，選 N 格＝N 人）
+     - rest：從正常時段移除（休息）
+     - waitlist：休息時段開放「候補」，值＝候補上限 */
   const ITEMS = {
     rf_us:{
       title:'電波・音波', key:'電波・音波',
       mains:['電波','音波'], mainRequired:true,
-      people:true,                 // 顯示人數（1–2 人）
+      multiSlot:true,
       addons:['敷麻','肉毒'],
-      ranges:[['12:00','20:00']], step:60
+      ranges:[['13:00','20:00']], step:60,
+      rest:['16:00'], waitlist:{'16:00':2}
     },
     onda:{
       title:'Onda', key:'Onda',
@@ -244,33 +222,40 @@
     botox:{
       title:'純肉毒療程', key:'純肉毒',
       mains:[], mainRequired:false,
-      botoxSites:true,             // 一律顯示施打部位
+      botoxSites:true,
       addons:['敷麻'],
-      ranges:[['14:00','15:00'],['17:00','18:00']], step:10
+      ranges:[['14:00','15:00'],['17:00','18:00']], step:60,
+      waitlist:{'16:00':2}
     }
   };
 
-  let CONFIG={};   // 項目設定 {電波・音波:{limit,enabled},...}
-  let COUNTS={};   // 選定日期的已預約數 {項目:{時段:數量}}
-  let currentItem=null;
+  let CONFIG={}, COUNTS={}, currentItem=null;
   const connected=()=>WEB_APP_URL.trim().length>0;
-
   const $=id=>document.getElementById(id);
   const toMin=t=>{const[a,b]=t.split(':').map(Number);return a*60+b;};
   const toStr=m=>('0'+Math.floor(m/60)).slice(-2)+':'+('0'+(m%60)).slice(-2);
 
   function genSlots(item){
     const out=[];
-    item.ranges.forEach(([s,e])=>{
-      for(let m=toMin(s);m+item.step<=toMin(e);m+=item.step) out.push(toStr(m));
-    });
+    item.ranges.forEach(([s,e])=>{for(let m=toMin(s);m+item.step<=toMin(e);m+=item.step)out.push(toStr(m));});
     return out;
+  }
+  // 正常時段(去掉休息) + 候補時段，依時間排序
+  function buildSlots(item){
+    const rest=new Set(item.rest||[]);
+    const normal=genSlots(item).filter(t=>!rest.has(t)).map(t=>({t,wait:false}));
+    const wait=Object.keys(item.waitlist||{}).map(t=>({t,wait:true}));
+    return normal.concat(wait).sort((a,b)=>toMin(a.t)-toMin(b.t));
+  }
+  function slotCap(item,slot){
+    if(item.waitlist && item.waitlist[slot]!=null) return item.waitlist[slot];
+    return (CONFIG[item.key]&&CONFIG[item.key].limit)||0;
   }
 
   /* 項目選擇 */
   document.querySelectorAll('.item').forEach(el=>{
     const r=el.querySelector('input');
-    el.addEventListener('click',ev=>{if(el.classList.contains('full')){ev.preventDefault();}});
+    el.addEventListener('click',ev=>{if(el.classList.contains('full'))ev.preventDefault();});
     r.addEventListener('change',()=>{
       document.querySelectorAll('.item').forEach(s=>s.classList.remove('on'));
       el.classList.add('on');
@@ -280,86 +265,59 @@
   });
 
   function renderSub(item){
-    // 主療程
     if(item.mains.length){
       $('mainField').style.display='';
-      $('mainOpts').innerHTML=item.mains.map(m=>
-        `<label class="opt"><input type="checkbox" class="main" value="${m}">${m}</label>`).join('');
-    }else{
-      $('mainField').style.display='none';$('mainOpts').innerHTML='';
-    }
-    // 人數（預設 1 人）
-    if(item.people){
-      $('peopleField').style.display='';
-      $('peopleOpts').innerHTML=[1,2].map(n=>
-        `<label class="opt${n===1?' on':''}"><input type="radio" name="people" value="${n}"${n===1?' checked':''}>${n} 人</label>`).join('');
-    }else{
-      $('peopleField').style.display='none';$('peopleOpts').innerHTML='';
-    }
-    // 加購
+      $('mainOpts').innerHTML=item.mains.map(m=>`<label class="opt"><input type="checkbox" class="main" value="${m}">${m}</label>`).join('');
+    }else{$('mainField').style.display='none';$('mainOpts').innerHTML='';}
+
     if(item.addons.length){
       $('addonField').style.display='';
-      $('addonOpts').innerHTML=item.addons.map(a=>
-        `<label class="opt"><input type="checkbox" class="addon" value="${a}">${a}</label>`).join('');
-    }else{
-      $('addonField').style.display='none';$('addonOpts').innerHTML='';
-    }
-    // 肉毒施打部位（內容先填好，顯示與否交給 updateSites）
-    $('siteOpts').innerHTML=BOTOX_SITES.map(s=>
-      `<label class="opt"><input type="checkbox" class="site" value="${s}">${s}</label>`).join('');
+      $('addonOpts').innerHTML=item.addons.map(a=>`<label class="opt"><input type="checkbox" class="addon" value="${a}">${a}</label>`).join('');
+    }else{$('addonField').style.display='none';$('addonOpts').innerHTML='';}
+
+    $('siteOpts').innerHTML=BOTOX_SITES.map(s=>`<label class="opt"><input type="checkbox" class="site" value="${s}">${s}</label>`).join('');
     bindOpts();
     updateSites();
-    // 時段
-    const slots=genSlots(item);
-    $('slots').innerHTML=slots.map(t=>
-      `<label class="slot"><input type="radio" name="slot" value="${t}">${t}</label>`).join('');
+
+    const type=item.multiSlot?'checkbox':'radio';
+    $('slotLabel').innerHTML='預約時段<span class="req">*</span>'+(item.multiSlot
+      ? '<span class="hint">每場 1 人；要預約 2 人請選 2 個時段</span>' : '');
+    $('slots').innerHTML=buildSlots(item).map(s=>
+      `<label class="slot${s.wait?' wait':''}"><input type="${type}" name="slot" value="${s.t}" data-wait="${s.wait?1:0}">${s.t}</label>`).join('');
     bindSlots();
-    // 顯示子表單
+
     $('subform').classList.add('show');
     $('pickfirst').style.display='none';
     $('submitBtn').style.display='';
-    // 若已選日期，刷新名額
-    if($('date').value) loadCounts($('date').value);
+    if($('date').value) loadCounts($('date').value); else refreshSlots();
   }
 
   function bindOpts(){
     document.querySelectorAll('.opt').forEach(el=>{
       const inp=el.querySelector('input');
       inp.addEventListener('change',()=>{
-        if(inp.type==='radio'){
-          document.querySelectorAll('.opt input[name="'+inp.name+'"]').forEach(o=>o.closest('.opt').classList.remove('on'));
-          el.classList.add('on');
-        }else{
-          el.classList.toggle('on',inp.checked);
-        }
+        el.classList.toggle('on',inp.checked);
         if(inp.classList.contains('addon')) updateSites();
       });
     });
   }
-
-  // 有肉毒（純肉毒項目 或 電波音波加購肉毒）才顯示施打部位
   function updateSites(){
     const item=ITEMS[currentItem];
     if(!item){$('sitesField').style.display='none';return;}
     let show=false;
     if(item.botoxSites) show=true;
-    else if(item.addons.includes('肉毒')){
-      const b=document.querySelector('.addon[value="肉毒"]');
-      show=!!(b && b.checked);
-    }
+    else if(item.addons.includes('肉毒')){const b=document.querySelector('.addon[value="肉毒"]');show=!!(b&&b.checked);}
     if(show){$('sitesField').style.display='';}
-    else{
-      $('sitesField').style.display='none';
-      document.querySelectorAll('.site:checked').forEach(i=>{i.checked=false;i.closest('.opt').classList.remove('on');});
-    }
+    else{$('sitesField').style.display='none';document.querySelectorAll('.site:checked').forEach(i=>{i.checked=false;i.closest('.opt').classList.remove('on');});}
   }
   function bindSlots(){
+    const multi=ITEMS[currentItem].multiSlot;
     document.querySelectorAll('.slot').forEach(el=>{
-      const r=el.querySelector('input');
+      const inp=el.querySelector('input');
       el.addEventListener('click',ev=>{if(el.classList.contains('full'))ev.preventDefault();});
-      r.addEventListener('change',()=>{
-        document.querySelectorAll('.slot').forEach(s=>s.classList.remove('on'));
-        el.classList.add('on');
+      inp.addEventListener('change',()=>{
+        if(multi){el.classList.toggle('on',inp.checked);}
+        else{document.querySelectorAll('.slot').forEach(s=>s.classList.remove('on'));el.classList.add('on');}
       });
     });
   }
@@ -370,7 +328,7 @@
   dateInput.min=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().split('T')[0];
   dateInput.addEventListener('change',()=>{if(dateInput.value)loadCounts(dateInput.value);});
 
-  /* JSONP 讀取 */
+  /* JSONP */
   function jsonp(url){
     return new Promise((resolve,reject)=>{
       const cb='__cb'+Math.floor(performance.now()*1000);
@@ -383,47 +341,40 @@
       document.body.appendChild(s);
     });
   }
-
   async function loadConfig(){
     if(!connected())return;
-    try{const d=await jsonp(WEB_APP_URL);CONFIG=d.config||{};applyItemEnabled();}
-    catch(e){console.warn('讀取設定失敗',e);}
+    try{const d=await jsonp(WEB_APP_URL);CONFIG=d.config||{};applyItemEnabled();}catch(e){console.warn('讀取設定失敗',e);}
   }
   function applyItemEnabled(){
     document.querySelectorAll('.item').forEach(el=>{
-      const key=ITEMS[el.querySelector('input').value].key;
-      const cfg=CONFIG[key];
-      if(cfg && !cfg.enabled){
-        el.classList.add('full');el.querySelector('input').disabled=true;
-      }
+      const cfg=CONFIG[ITEMS[el.querySelector('input').value].key];
+      if(cfg && !cfg.enabled){el.classList.add('full');el.querySelector('input').disabled=true;}
     });
   }
-
   async function loadCounts(date){
     if(!connected()){refreshSlots();return;}
-    try{const d=await jsonp(WEB_APP_URL+'?date='+encodeURIComponent(date));
-      CONFIG=d.config||CONFIG;COUNTS=d.counts||{};}
+    try{const d=await jsonp(WEB_APP_URL+'?date='+encodeURIComponent(date));CONFIG=d.config||CONFIG;COUNTS=d.counts||{};}
     catch(e){console.warn('讀取預約數失敗',e);COUNTS={};}
     refreshSlots();
   }
-
   function refreshSlots(){
     if(!currentItem)return;
-    const key=ITEMS[currentItem].key;
-    const limit=(CONFIG[key]&&CONFIG[key].limit)||0;
+    const item=ITEMS[currentItem];
     document.querySelectorAll('.slot').forEach(el=>{
-      const slot=el.querySelector('input').value;
+      const inp=el.querySelector('input');
+      const slot=inp.value, wait=inp.dataset.wait==='1';
       el.querySelectorAll('.left').forEach(x=>x.remove());
-      if(!connected()){el.classList.remove('full');return;}
-      const used=(COUNTS[key]&&COUNTS[key][slot])||0;
-      const left=limit-used;
+      if(!connected()){el.classList.remove('full');if(wait)el.insertAdjacentHTML('beforeend','<span class="left">候補</span>');return;}
+      const cap=slotCap(item,slot);
+      const used=(COUNTS[item.key]&&COUNTS[item.key][slot])||0;
+      const left=cap-used;
       if(left<=0){
         el.classList.add('full');
-        if(el.querySelector('input').checked){el.classList.remove('on');el.querySelector('input').checked=false;}
-        el.insertAdjacentHTML('beforeend','<span class="left">額滿</span>');
+        if(inp.checked){el.classList.remove('on');inp.checked=false;}
+        el.insertAdjacentHTML('beforeend','<span class="left">'+(wait?'候補額滿':'額滿')+'</span>');
       }else{
         el.classList.remove('full');
-        el.insertAdjacentHTML('beforeend','<span class="left">剩 '+left+'</span>');
+        el.insertAdjacentHTML('beforeend','<span class="left">'+(wait?('候補 '+left):('剩 '+left))+'</span>');
       }
     });
   }
@@ -438,9 +389,9 @@
     const mains=[...document.querySelectorAll('.main:checked')].map(i=>i.value);
     const addons=[...document.querySelectorAll('.addon:checked')].map(i=>i.value);
     const sites=[...document.querySelectorAll('.site:checked')].map(i=>i.value);
-    const peopleEl=document.querySelector('input[name="people"]:checked');
-    const people=item.people ? (peopleEl?parseInt(peopleEl.value,10):1) : 1;
-    const slot=document.querySelector('.slot input:checked');
+    const slotInputs=[...document.querySelectorAll('.slot input:checked')];
+    const slots=slotInputs.map(i=>i.value);
+    const hasWait=slotInputs.some(i=>i.dataset.wait==='1');
     const sitesShown=$('sitesField').style.display!=='none';
 
     [name,phone,date].forEach(f=>f.classList.remove('err'));
@@ -448,43 +399,41 @@
     if(!name.value.trim()){name.classList.add('err');ok=false;}
     if(!phone.value.trim()){phone.classList.add('err');ok=false;}
     if(item.mainRequired && mains.length===0){alert('請選擇療程項目');ok=false;}
-    if(item.people && !peopleEl){alert('請選擇預約人數');ok=false;}
     if(sitesShown && sites.length===0){alert('請選擇肉毒施打部位');ok=false;}
     if(!date.value){date.classList.add('err');ok=false;}
-    if(!slot){alert('請選擇預約時段');ok=false;}
+    if(slots.length===0){alert('請選擇預約時段');ok=false;}
     if(!ok)return;
 
-    const payload={
-      item:item.key,name:name.value.trim(),phone:phone.value.trim(),
-      mains,addons,sites,people,date:date.value,slot:slot.value,note:$('note').value.trim()
-    };
+    const people=item.multiSlot?slots.length:1;
+    const payload={item:item.key,name:name.value.trim(),phone:phone.value.trim(),
+      mains,addons,sites,people,slots,date:date.value,note:$('note').value.trim()};
 
-    if(!connected()){showDone(payload);return;}
+    if(!connected()){showDone(payload,hasWait);return;}
 
     submitBtn.disabled=true;submitBtn.textContent='送出中…';
     try{
-      const res=await fetch(WEB_APP_URL,{method:'POST',
-        headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body:JSON.stringify(payload)});
+      const res=await fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
       const data=await res.json();
-      if(data.ok)showDone(payload);
-      else if(data.full){alert('該時段剛好額滿，請改選其他時段');loadCounts(date.value);}
+      if(data.ok)showDone(payload,hasWait);
+      else if(data.full){alert('以下時段剛好額滿，請改選：'+(data.fullSlots?data.fullSlots.join('、'):''));loadCounts(date.value);}
       else alert('送出失敗：'+(data.error||'請稍後再試'));
     }catch(err){alert('連線失敗，請確認網路後再試一次');console.error(err);}
     finally{submitBtn.disabled=false;submitBtn.textContent='送 出 預 約';}
   });
 
-  function showDone(p){
+  function showDone(p,isWait){
+    $('doneTitle').textContent=isWait?'候補已登記':'預約已送出';
+    $('doneSub').textContent=isWait?'此為候補登記，將由專人與您確認':'我們已收到您的預約申請';
     let rows=`<div><span class="k">項目</span><span class="v">${p.item}</span></div>`;
     if(p.mains.length) rows+=`<div><span class="k">療程</span><span class="v">${p.mains.join('、')}</span></div>`;
-    if(p.people>1) rows+=`<div><span class="k">人數</span><span class="v">${p.people} 人</span></div>`;
     if(p.addons.length) rows+=`<div><span class="k">加購</span><span class="v">${p.addons.join('、')}</span></div>`;
     if(p.sites.length) rows+=`<div><span class="k">部位</span><span class="v">${p.sites.join('、')}</span></div>`;
+    if(p.people>1) rows+=`<div><span class="k">人數</span><span class="v">${p.people} 人</span></div>`;
     rows+=`
       <div><span class="k">姓名</span><span class="v">${p.name}</span></div>
       <div><span class="k">電話</span><span class="v">${p.phone}</span></div>
       <div><span class="k">日期</span><span class="v">${p.date}</span></div>
-      <div><span class="k">時段</span><span class="v">${p.slot}</span></div>`;
+      <div><span class="k">時段</span><span class="v">${p.slots.join('、')}</span></div>`;
     $('summary').innerHTML=rows;
     $('overlay').classList.add('show');
   }
@@ -499,7 +448,6 @@
     currentItem=null;
   });
 
-  /* 啟動 */
   loadConfig();
 </script>
 </body>
