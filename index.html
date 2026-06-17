@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>線上預約 ｜ 美學中心</title>
+<title>線上預約 ｜ ZOEY CLINIC DIARY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#faf6f2; --card:#ffffff; --ink:#3d3530; --muted:#9a8f86;
@@ -12,15 +15,15 @@
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   body{
-    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+    font-family:"Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
     background:linear-gradient(160deg,#f7efe8,#faf6f2 40%,#f4ece4);
     color:var(--ink);line-height:1.6;min-height:100vh;padding:24px 16px 60px;
   }
   .wrap{max-width:480px;margin:0 auto;}
 
   .head{text-align:center;padding:18px 0 22px;}
-  .logo{font-size:13px;letter-spacing:4px;color:var(--gold-deep);font-weight:600;margin-bottom:10px;}
-  .head h1{font-size:26px;font-weight:700;letter-spacing:2px;margin-bottom:8px;}
+  .logo{font-family:"Cormorant Garamond",serif;font-size:19px;letter-spacing:5px;color:var(--gold-deep);font-weight:600;margin-bottom:8px;}
+  .head h1{font-size:27px;font-weight:600;letter-spacing:3px;margin-bottom:8px;}
   .head p{color:var(--muted);font-size:14px;letter-spacing:1px;}
 
   .card{background:var(--card);border-radius:22px;padding:24px 20px;box-shadow:var(--shadow);border:1px solid var(--line);}
@@ -90,9 +93,11 @@
   .consult-box{text-align:center;margin-top:18px;}
   .consult-desc{font-size:13px;color:var(--muted);margin-bottom:9px;}
   .consult-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 26px;border-radius:999px;
-    background:linear-gradient(135deg,#4a4039,#2b2521);color:#e8d3a8;text-decoration:none;font-size:14px;font-weight:600;
-    letter-spacing:2px;border:1px solid rgba(212,180,131,.45);box-shadow:0 6px 18px rgba(60,48,40,.25);transition:.2s;}
-  .consult-btn:hover{transform:translateY(-1px);box-shadow:0 9px 22px rgba(60,48,40,.34);}
+    background:linear-gradient(135deg,#9a8872,#6f5e4d);color:#fff7e8;text-decoration:none;font-size:14px;font-weight:600;
+    letter-spacing:2px;border:1px solid rgba(212,180,131,.55);box-shadow:0 6px 18px rgba(111,94,77,.22);transition:.2s;}
+  .consult-btn:hover{transform:translateY(-1px);box-shadow:0 9px 22px rgba(111,94,77,.3);}
+  .opt-note{font-size:10px;font-weight:400;margin-left:6px;color:var(--gold-deep);}
+  .opt.on .opt-note{color:rgba(255,255,255,.9);}
 
   .footnote{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;letter-spacing:.5px;}
 
@@ -127,7 +132,7 @@
             <input type="radio" name="item" value="rf_us">
             <div class="it-top"><span class="it-name">電波・音波</span><span class="it-unit">1 小時／場・每場 1 人</span></div>
             <div class="it-meta">服務時間 13:00–20:00</div>
-            <div class="it-add">可加購：敷麻、肉毒（不額外佔用時間）</div>
+            <div class="it-add">可加購：敷麻、冰敷（不額外佔用時間）</div>
             <span class="tick">✓</span>
           </label>
           <label class="item">
@@ -140,7 +145,7 @@
             <input type="radio" name="item" value="botox">
             <div class="it-top"><span class="it-name">純肉毒療程</span><span class="it-unit">1 小時／場・每場 2 人</span></div>
             <div class="it-meta">服務時間 13:00–20:00</div>
-            <div class="it-add">可加購：敷麻</div>
+            <div class="it-add">可加購：敷麻、冰敷</div>
             <span class="tick">✓</span>
           </label>
         </div>
@@ -215,17 +220,17 @@
 
   const WAITLIST_CAP = 2; // 每個時段額滿後可候補人數（全項目通用）
   const FIXED_DATE = "2026-07-26"; // 設定後預約日期固定此日；要恢復自由選擇就改成 ""
-  const BOTOX_SITES = ['額頭（抬頭紋）','眉間（皺眉紋）','眼周（魚尾紋）','國字臉（咀嚼肌）','肩頸（斜方肌）','下巴'];
+  const BOTOX_SITES = ['額頭（抬頭紋）','眉間（皺眉紋）','眼周（魚尾紋）','國字臉（咀嚼肌）','肩頸（斜方肌）','下巴','下顎線'];
 
   /* 三個預約項目定義（multiSlot：時段可複選，每格一人）
      rest：休息時段，正常名額視為 0、只開放候補（Onda 不受影響） */
   const ITEMS = {
     rf_us:{ title:'電波・音波', key:'電波・音波', mains:['電波','音波'], mainRequired:true,
-      multiSlot:true, addons:['敷麻','肉毒'], ranges:[['13:00','20:00']], step:60, rest:['16:00'] },
+      multiSlot:true, addons:['敷麻','冰敷'], ranges:[['13:00','20:00']], step:60, rest:['16:00'] },
     onda:{ title:'Onda', key:'Onda', mains:[], mainRequired:false,
       addons:[], ranges:[['13:00','18:00']], step:20 },
     botox:{ title:'純肉毒療程', key:'純肉毒', mains:[], mainRequired:false,
-      botoxSites:true, addons:['敷麻'], ranges:[['13:00','20:00']], step:60, rest:['16:00'] }
+      botoxSites:true, addons:['敷麻','冰敷'], ranges:[['13:00','20:00']], step:60, rest:['16:00'] }
   };
 
   let CONFIG={}, COUNTS={}, currentItem=null;
@@ -263,7 +268,7 @@
 
     if(item.addons.length){
       $('addonField').style.display='';
-      $('addonOpts').innerHTML=item.addons.map(a=>`<label class="opt"><input type="checkbox" class="addon" value="${a}">${a}</label>`).join('');
+      $('addonOpts').innerHTML=item.addons.map(a=>{const note=a==='冰敷'?'<span class="opt-note">更有效喔！</span>':'';return `<label class="opt"><input type="checkbox" class="addon" value="${a}">${a}${note}</label>`;}).join('');
     }else{$('addonField').style.display='none';$('addonOpts').innerHTML='';}
 
     $('siteOpts').innerHTML=BOTOX_SITES.map(s=>`<label class="opt"><input type="checkbox" class="site" value="${s}">${s}</label>`).join('');
