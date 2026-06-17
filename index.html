@@ -8,7 +8,7 @@
   :root{
     --bg:#faf6f2; --card:#ffffff; --ink:#3d3530; --muted:#9a8f86;
     --line:#ece3da; --gold:#c0a06a; --gold-deep:#a8854f; --rose:#d9b3a3;
-    --shadow:0 10px 40px rgba(120,95,70,.10);
+    --line-green:#06c755; --shadow:0 10px 40px rgba(120,95,70,.10);
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   body{
@@ -67,7 +67,8 @@
   .slot:hover{border-color:var(--rose);}
   .slot input{position:absolute;opacity:0;pointer-events:none;}
   .slot.on{border-color:var(--gold);background:var(--gold);color:#fff;font-weight:600;box-shadow:0 5px 14px rgba(192,160,106,.25);}
-  .slot.wait{border-style:dashed;}
+  .slot.wait{border-style:dashed;border-color:var(--rose);}
+  .slot.wait.on{background:var(--rose);border-style:solid;}
   .slot.full{opacity:.45;cursor:not-allowed;filter:grayscale(.4);}
   .slot.full:hover{border-color:var(--line);}
   .slot .left{display:block;font-size:10px;color:var(--gold-deep);margin-top:1px;font-weight:600;}
@@ -84,6 +85,17 @@
   #subform.show{display:block;animation:fade .25s ease;}
   @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
   .pickfirst{text-align:center;color:var(--muted);font-size:13px;padding:6px 0 2px;}
+
+  /* 諮詢按鈕 */
+  .consult{display:flex;align-items:center;gap:14px;margin-top:16px;padding:16px 18px;border-radius:18px;
+    background:linear-gradient(135deg,#fff,#f3f9f1);border:1.5px solid #cdeed8;text-decoration:none;color:var(--ink);
+    box-shadow:0 8px 24px rgba(6,199,85,.10);transition:.2s;}
+  .consult:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(6,199,85,.18);}
+  .consult .ci{width:44px;height:44px;border-radius:50%;background:var(--line-green);color:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:22px;}
+  .consult .ctitle{font-size:16px;font-weight:700;}
+  .consult .cdesc{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .consult .cgo{margin-left:auto;color:var(--line-green);font-weight:700;font-size:14px;white-space:nowrap;}
 
   .footnote{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;letter-spacing:.5px;}
 
@@ -117,7 +129,7 @@
           <label class="item">
             <input type="radio" name="item" value="rf_us">
             <div class="it-top"><span class="it-name">電波・音波</span><span class="it-unit">1 小時／場・每場 1 人</span></div>
-            <div class="it-meta">服務時間 13:00–20:00（12:00–13:00 為準備時間）</div>
+            <div class="it-meta">服務時間 13:00–20:00</div>
             <div class="it-add">可加購：敷麻、肉毒（不額外佔用時間）</div>
             <span class="tick">✓</span>
           </label>
@@ -130,7 +142,7 @@
           <label class="item">
             <input type="radio" name="item" value="botox">
             <div class="it-top"><span class="it-name">純肉毒療程</span><span class="it-unit">1 小時／場・每場 2 人</span></div>
-            <div class="it-meta">服務時間 14:00–15:00、17:00–18:00</div>
+            <div class="it-meta">服務時間 13:00–20:00</div>
             <div class="it-add">可加購：敷麻</div>
             <span class="tick">✓</span>
           </label>
@@ -179,6 +191,16 @@
       <button type="submit" class="submit" id="submitBtn" style="display:none;">送 出 預 約</button>
     </form>
 
+    <!-- 諮詢按鈕 -->
+    <a class="consult" href="https://line.me/ti/p/9fy2qZ-qg9" target="_blank" rel="noopener">
+      <span class="ci">🥨</span>
+      <span>
+        <span class="ctitle">諮詢語彤🥨</span>
+        <span class="cdesc">還不知道哪裡可以更美？歡迎諮詢！</span>
+      </span>
+      <span class="cgo">前往 ›</span>
+    </a>
+
     <p class="footnote">送出後僅為預約申請，正式時段以專人聯繫確認為準</p>
   </div>
 
@@ -198,35 +220,17 @@
   =================================================================== */
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbySt3iWpoZHpE9KmuCTybgZxNsTVD4pU6gUdoThHkF684g0MXoVV7x2Rak_yESv3Qzamg/exec";
 
+  const WAITLIST_CAP = 2; // 每個時段額滿後可候補人數（全項目通用）
   const BOTOX_SITES = ['額頭（抬頭紋）','眉間（皺眉紋）','眼周（魚尾紋）','國字臉（咀嚼肌）','肩頸（斜方肌）','下巴'];
 
-  /* 三個預約項目定義
-     - multiSlot：時段可複選（每格一人，選 N 格＝N 人）
-     - rest：從正常時段移除（休息）
-     - waitlist：休息時段開放「候補」，值＝候補上限 */
+  /* 三個預約項目定義（multiSlot：時段可複選，每格一人） */
   const ITEMS = {
-    rf_us:{
-      title:'電波・音波', key:'電波・音波',
-      mains:['電波','音波'], mainRequired:true,
-      multiSlot:true,
-      addons:['敷麻','肉毒'],
-      ranges:[['13:00','20:00']], step:60,
-      rest:['16:00'], waitlist:{'16:00':2}
-    },
-    onda:{
-      title:'Onda', key:'Onda',
-      mains:[], mainRequired:false,
-      addons:[],
-      ranges:[['13:00','18:00']], step:20
-    },
-    botox:{
-      title:'純肉毒療程', key:'純肉毒',
-      mains:[], mainRequired:false,
-      botoxSites:true,
-      addons:['敷麻'],
-      ranges:[['14:00','15:00'],['17:00','18:00']], step:60,
-      waitlist:{'16:00':2}
-    }
+    rf_us:{ title:'電波・音波', key:'電波・音波', mains:['電波','音波'], mainRequired:true,
+      multiSlot:true, addons:['敷麻','肉毒'], ranges:[['13:00','20:00']], step:60 },
+    onda:{ title:'Onda', key:'Onda', mains:[], mainRequired:false,
+      addons:[], ranges:[['13:00','18:00']], step:20 },
+    botox:{ title:'純肉毒療程', key:'純肉毒', mains:[], mainRequired:false,
+      botoxSites:true, addons:['敷麻'], ranges:[['13:00','20:00']], step:60 }
   };
 
   let CONFIG={}, COUNTS={}, currentItem=null;
@@ -240,17 +244,7 @@
     item.ranges.forEach(([s,e])=>{for(let m=toMin(s);m+item.step<=toMin(e);m+=item.step)out.push(toStr(m));});
     return out;
   }
-  // 正常時段(去掉休息) + 候補時段，依時間排序
-  function buildSlots(item){
-    const rest=new Set(item.rest||[]);
-    const normal=genSlots(item).filter(t=>!rest.has(t)).map(t=>({t,wait:false}));
-    const wait=Object.keys(item.waitlist||{}).map(t=>({t,wait:true}));
-    return normal.concat(wait).sort((a,b)=>toMin(a.t)-toMin(b.t));
-  }
-  function slotCap(item,slot){
-    if(item.waitlist && item.waitlist[slot]!=null) return item.waitlist[slot];
-    return (CONFIG[item.key]&&CONFIG[item.key].limit)||0;
-  }
+  function normalCapOf(item){return (CONFIG[item.key]&&CONFIG[item.key].limit)||0;}
 
   /* 項目選擇 */
   document.querySelectorAll('.item').forEach(el=>{
@@ -280,10 +274,11 @@
     updateSites();
 
     const type=item.multiSlot?'checkbox':'radio';
-    $('slotLabel').innerHTML='預約時段<span class="req">*</span>'+(item.multiSlot
-      ? '<span class="hint">每場 1 人；要預約 2 人請選 2 個時段</span>' : '');
-    $('slots').innerHTML=buildSlots(item).map(s=>
-      `<label class="slot${s.wait?' wait':''}"><input type="${type}" name="slot" value="${s.t}" data-wait="${s.wait?1:0}">${s.t}</label>`).join('');
+    $('slotLabel').innerHTML='預約時段<span class="req">*</span><span class="hint">'
+      +(item.multiSlot?'每場 1 人，要約 2 人請選 2 個時段；':'')
+      +'時段額滿可候補（候補上限 2 人）</span>';
+    $('slots').innerHTML=genSlots(item).map(t=>
+      `<label class="slot"><input type="${type}" name="slot" value="${t}">${t}</label>`).join('');
     bindSlots();
 
     $('subform').classList.add('show');
@@ -357,24 +352,26 @@
     catch(e){console.warn('讀取預約數失敗',e);COUNTS={};}
     refreshSlots();
   }
+  // 全時段通用：先正常名額，滿了開放候補（上限 WAITLIST_CAP），都滿才額滿
   function refreshSlots(){
     if(!currentItem)return;
     const item=ITEMS[currentItem];
+    const nCap=normalCapOf(item), tCap=nCap+WAITLIST_CAP;
     document.querySelectorAll('.slot').forEach(el=>{
-      const inp=el.querySelector('input');
-      const slot=inp.value, wait=inp.dataset.wait==='1';
+      const inp=el.querySelector('input'), slot=inp.value;
       el.querySelectorAll('.left').forEach(x=>x.remove());
-      if(!connected()){el.classList.remove('full');if(wait)el.insertAdjacentHTML('beforeend','<span class="left">候補</span>');return;}
-      const cap=slotCap(item,slot);
+      el.classList.remove('wait','full');
+      if(!connected())return;
       const used=(COUNTS[item.key]&&COUNTS[item.key][slot])||0;
-      const left=cap-used;
-      if(left<=0){
+      if(used>=tCap){
         el.classList.add('full');
         if(inp.checked){el.classList.remove('on');inp.checked=false;}
-        el.insertAdjacentHTML('beforeend','<span class="left">'+(wait?'候補額滿':'額滿')+'</span>');
+        el.insertAdjacentHTML('beforeend','<span class="left">額滿</span>');
+      }else if(used>=nCap){
+        el.classList.add('wait');
+        el.insertAdjacentHTML('beforeend','<span class="left">候補 '+(tCap-used)+'</span>');
       }else{
-        el.classList.remove('full');
-        el.insertAdjacentHTML('beforeend','<span class="left">'+(wait?('候補 '+left):('剩 '+left))+'</span>');
+        el.insertAdjacentHTML('beforeend','<span class="left">剩 '+(nCap-used)+'</span>');
       }
     });
   }
@@ -389,9 +386,7 @@
     const mains=[...document.querySelectorAll('.main:checked')].map(i=>i.value);
     const addons=[...document.querySelectorAll('.addon:checked')].map(i=>i.value);
     const sites=[...document.querySelectorAll('.site:checked')].map(i=>i.value);
-    const slotInputs=[...document.querySelectorAll('.slot input:checked')];
-    const slots=slotInputs.map(i=>i.value);
-    const hasWait=slotInputs.some(i=>i.dataset.wait==='1');
+    const slots=[...document.querySelectorAll('.slot input:checked')].map(i=>i.value);
     const sitesShown=$('sitesField').style.display!=='none';
 
     [name,phone,date].forEach(f=>f.classList.remove('err'));
@@ -404,18 +399,20 @@
     if(slots.length===0){alert('請選擇預約時段');ok=false;}
     if(!ok)return;
 
+    const nCap=normalCapOf(item);
+    const guessWait=slots.some(s=>((COUNTS[item.key]&&COUNTS[item.key][s])||0)>=nCap);
     const people=item.multiSlot?slots.length:1;
     const payload={item:item.key,name:name.value.trim(),phone:phone.value.trim(),
       mains,addons,sites,people,slots,date:date.value,note:$('note').value.trim()};
 
-    if(!connected()){showDone(payload,hasWait);return;}
+    if(!connected()){showDone(payload,guessWait);return;}
 
     submitBtn.disabled=true;submitBtn.textContent='送出中…';
     try{
       const res=await fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
       const data=await res.json();
-      if(data.ok)showDone(payload,hasWait);
-      else if(data.full){alert('以下時段剛好額滿，請改選：'+(data.fullSlots?data.fullSlots.join('、'):''));loadCounts(date.value);}
+      if(data.ok)showDone(payload,data.waitlist===true);
+      else if(data.full){alert('以下時段已額滿（含候補）：'+(data.fullSlots?data.fullSlots.join('、'):'')+'，請改選');loadCounts(date.value);}
       else alert('送出失敗：'+(data.error||'請稍後再試'));
     }catch(err){alert('連線失敗，請確認網路後再試一次');console.error(err);}
     finally{submitBtn.disabled=false;submitBtn.textContent='送 出 預 約';}
@@ -424,7 +421,7 @@
   function showDone(p,isWait){
     $('doneTitle').textContent=isWait?'候補已登記':'預約已送出';
     $('doneSub').textContent=isWait?'此為候補登記，將由專人與您確認':'我們已收到您的預約申請';
-    let rows=`<div><span class="k">項目</span><span class="v">${p.item}</span></div>`;
+    let rows=`<div><span class="k">項目</span><span class="v">${p.item}${isWait?'（候補）':''}</span></div>`;
     if(p.mains.length) rows+=`<div><span class="k">療程</span><span class="v">${p.mains.join('、')}</span></div>`;
     if(p.addons.length) rows+=`<div><span class="k">加購</span><span class="v">${p.addons.join('、')}</span></div>`;
     if(p.sites.length) rows+=`<div><span class="k">部位</span><span class="v">${p.sites.join('、')}</span></div>`;
