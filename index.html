@@ -89,6 +89,17 @@
   @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
   .pickfirst{text-align:center;color:var(--muted);font-size:13px;padding:6px 0 2px;}
 
+  /* 參考價格 */
+  .price-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px 20px;margin-top:16px;box-shadow:var(--shadow);}
+  .price-title{font-size:16px;font-weight:600;letter-spacing:2px;margin-bottom:14px;color:var(--ink);display:flex;align-items:center;gap:10px;}
+  .price-title::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold),transparent);}
+  .price-row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--line);}
+  .price-row .pn{font-size:15px;font-weight:600;}
+  .price-row .pv{font-size:15px;font-weight:600;color:var(--gold-deep);}
+  .price-note{font-size:12px;color:var(--muted);margin-top:13px;line-height:1.7;}
+  .pay-note{margin-top:14px;padding:12px 14px;background:#faf4ea;border-radius:12px;font-size:13px;color:var(--ink);line-height:1.6;}
+  .pay-note b{color:var(--gold-deep);}
+
   /* 諮詢 */
   .consult-box{text-align:center;margin-top:18px;}
   .consult-desc{font-size:13px;color:var(--muted);margin-bottom:9px;}
@@ -192,6 +203,17 @@
       <div class="pickfirst" id="pickfirst">請先於上方選擇預約項目</div>
       <button type="submit" class="submit" id="submitBtn" style="display:none;">送 出 預 約</button>
     </form>
+
+    <!-- 參考價格與付款方式 -->
+    <div class="price-card">
+      <div class="price-title">參考價格</div>
+      <div class="price-row"><span class="pn">電波</span><span class="pv">NT$45 ／ 發</span></div>
+      <div class="price-row"><span class="pn">音波</span><span class="pv">NT$30 ／ 條</span></div>
+      <div class="price-row"><span class="pn">肉毒</span><span class="pv">NT$40 ／ 單位</span></div>
+      <div class="price-row"><span class="pn">Onda</span><span class="pv">NT$5,000 ／ 部位</span></div>
+      <div class="price-note">・基本電波／音波療程約需 500～700 發（條）。<br>・以上為參考單價，總金額由「當日最終諮詢結果」與「實際施作療程項目」決定。</div>
+      <div class="pay-note">付款方式：僅提供 <b>現金 ／ 轉帳</b> 支付，造成不便敬請見諒。</div>
+    </div>
 
     <!-- 諮詢 -->
     <div class="consult-box">
